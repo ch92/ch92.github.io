@@ -3,7 +3,7 @@ const CONFIG = {
   fundamentalFrequency: 130.81, // C3
   fundamentalNote: 'C3',
   numPartials: 12, // Number of harmonics to use (can be changed via UI)
-  maxPartials: 21, // Maximum available partials
+  maxPartials: 200, // Maximum available partials
   attackTime: 3, // Fade in time for fundamental
   releaseTime: 2, // Fade out time for harmonics
   sustainVolume: -18, // dB for fundamental
