@@ -111,17 +111,25 @@ function startFundamental() {
 
 /**
  * Randomly select a harmonic to fade in
+ * Uses the current CONFIG.numPartials value
  */
 function selectRandomHarmonic() {
-  // Pick a random partial (skip the fundamental itself - start from 2)
-  const partial = Math.floor(Math.random() * (CONFIG.numPartials - 1)) + 2;
-  
-  // Don't start a new note if this harmonic is already active
-  if (state.activeNotes.has(partial)) {
-    return selectRandomHarmonic(); // Try again with different partial
+  // Get available partials (skip the fundamental itself - start from 2)
+  const availablePartials = [];
+  for (let i = 2; i <= CONFIG.numPartials; i++) {
+    if (!state.activeNotes.has(i)) {
+      availablePartials.push(i);
+    }
   }
   
-  return partial;
+  // If no partials available, try again later
+  if (availablePartials.length === 0) {
+    return null;
+  }
+  
+  // Pick a random one from available
+  const randomIndex = Math.floor(Math.random() * availablePartials.length);
+  return availablePartials[randomIndex];
 }
 
 /**
@@ -162,7 +170,7 @@ function fadeInHarmonic(partial) {
     startTime: Tone.now()
   });
   
-  console.log(`✨ Harmonic ${partial}: ${noteName} (${frequency.toFixed(2)}Hz) fading in to ${targetVolume}dB`);
+  console.log(`✨ Harmonic ${partial}: ${noteName} (${frequency.toFixed(2)}Hz) fading in to ${targetVolume.toFixed(1)}dB`);
 }
 
 /**
@@ -198,8 +206,8 @@ function startHarmonicLoop() {
     if (!state.isPlaying) return;
     
     // Fade in a new harmonic
-    try {
-      const partial = selectRandomHarmonic();
+    const partial = selectRandomHarmonic();
+    if (partial !== null) {
       fadeInHarmonic(partial);
       
       // Schedule fade out after random duration
@@ -209,8 +217,6 @@ function startHarmonicLoop() {
           fadeOutHarmonic(partial);
         }
       }, duration * 1000);
-    } catch (e) {
-      // All harmonics might be active, retry later
     }
     
     // Schedule next harmonic to start
@@ -258,7 +264,8 @@ function stop() {
  * @param {number} numPartials - New number of partials (2-21)
  */
 function setNumPartials(numPartials) {
-  CONFIG.numPartials = Math.max(2, Math.min(numPartials, CONFIG.numPartials));
+  const newValue = Math.max(2, Math.min(numPartials, CONFIG.maxPartials));
+  CONFIG.numPartials = newValue;
   console.log(`📊 Partials updated to: ${CONFIG.numPartials}`);
 }
 
