@@ -6,9 +6,9 @@ const CONFIG = {
   maxPartials: 100, // Maximum available partials
   attackTime: 3, // Fade in time for fundamental
   releaseTime: 2, // Fade out time for harmonics
-  sustainVolume: -18, // dB for fundamental
-  harmonicMinVolume: -40, // dB for quietest harmonics
-  harmonicMaxVolume: -12, // dB for loudest harmonics
+  sustainVolume: -22, // dB for fundamental
+  harmonicMinVolume: -50, // dB for quietest harmonics
+  harmonicMaxVolume: -16, // dB for loudest harmonics
   noteLengthMin: 4, // Minimum note duration in seconds
   noteLengthMax: 20, // Maximum note duration in seconds
   density: 3, // Target number of concurrent notes (1-12)
