@@ -1,28 +1,33 @@
 // HarmonicSeries.js
 
-let noteLength = 1; // Duration of each note in seconds
-let density = 1; // Number of concurrent notes
-let tempo = 120; // Beats per minute
+// Expanded CONFIG object with new settings
+const CONFIG = {
+    noteLength: 400, // length of each note in milliseconds
+    density: 3, // number of concurrent notes
+    tempo: 120, // beats per minute
+    // ... other existing settings
+};
 
-function updateNoteLength(newLength) {
-    noteLength = newLength;
+// Function to set note length
+function setNoteLength(length) {
+    CONFIG.noteLength = length;
 }
 
-function updateDensity(newDensity) {
-    density = newDensity;
+// Function to set density
+function setDensity(concurrentNotes) {
+    CONFIG.density = concurrentNotes;
 }
 
-function updateTempo(newTempo) {
-    tempo = newTempo;
+// Function to set tempo
+function setTempo(bpm) {
+    CONFIG.tempo = bpm;
 }
 
-function getConfigurations() {
-    return {
-        noteLength,
-        density,
-        tempo
-    };
+// Modified harmonic loop to use new parameters
+function startHarmonicLoop() {
+    const interval = 60000 / CONFIG.tempo; // calculate interval from tempo
+    // Logic for starting harmonic notes using CONFIG.noteLength, CONFIG.density, and interval for frequency
+    //... implement the looping and playing logic based on the new CONFIG values
 }
 
-// Initial configuration
-console.log(getConfigurations());
+// ... rest of the harmonic system logic
