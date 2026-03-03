@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Harmonic Music Generator</title>
+  <!-- Load Tone.js FIRST -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-  <script src="HarmonicSeries.js"></script>
   <style>
     * {
       margin: 0;
@@ -28,8 +28,10 @@
       border-radius: 16px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       padding: 40px;
-      max-width: 500px;
+      max-width: 550px;
       width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
     h1 {
@@ -196,7 +198,7 @@
       border-radius: 8px;
       padding: 15px;
       margin-top: 15px;
-      max-height: 200px;
+      max-height: 150px;
       overflow-y: auto;
     }
 
@@ -283,6 +285,69 @@
       </div>
     </div>
 
+    <div class="control-section">
+      <h2>Timing & Density</h2>
+      <div class="control-group">
+        <label for="noteLengthMin">Note Length Min (seconds)</label>
+        <input 
+          type="range" 
+          id="noteLengthMin" 
+          min="1" 
+          max="15" 
+          value="4"
+          step="0.5"
+        >
+        <div class="value-display">
+          <span id="noteLengthMinValue">4s</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="noteLengthMax">Note Length Max (seconds)</label>
+        <input 
+          type="range" 
+          id="noteLengthMax" 
+          min="5" 
+          max="30" 
+          value="20"
+          step="0.5"
+        >
+        <div class="value-display">
+          <span id="noteLengthMaxValue">20s</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="density">Density (concurrent notes)</label>
+        <input 
+          type="range" 
+          id="density" 
+          min="1" 
+          max="12" 
+          value="3"
+          step="1"
+        >
+        <div class="value-display">
+          <span id="densityValue">3 notes</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="tempo">Tempo (BPM)</label>
+        <input 
+          type="range" 
+          id="tempo" 
+          min="40" 
+          max="200" 
+          value="120"
+          step="1"
+        >
+        <div class="value-display">
+          <span id="tempoValue">120 BPM</span>
+        </div>
+      </div>
+    </div>
+
     <div class="button-group">
       <button class="play-btn" id="playBtn">Play</button>
       <button class="stop-btn" id="stopBtn" disabled>Stop</button>
@@ -290,7 +355,7 @@
 
     <div class="info">
       <strong>✨ How it works:</strong>
-      <br>A fundamental note plays continuously while harmonics from the harmonic series fade in and out randomly. The pitch of each harmonic is based on the fundamental × its partial number (1×, 2×, 3×, etc.).
+      <br>A fundamental note plays continuously while harmonics fade in and out based on tempo and density settings. Use the sliders to control the harmonic richness, note length, and overall feel of the piece.
     </div>
 
     <div class="notes-display" id="notesDisplay">
@@ -298,6 +363,7 @@
     </div>
   </div>
 
+  <!-- Load HarmonicSeries.js AFTER Tone.js -->
   <script src="HarmonicSeries.js"></script>
   <script>
     const playBtn = document.getElementById('playBtn');
@@ -306,6 +372,10 @@
     const numPartialsInput = document.getElementById('numPartials');
     const maxVolumeInput = document.getElementById('maxVolume');
     const minVolumeInput = document.getElementById('minVolume');
+    const noteLengthMinInput = document.getElementById('noteLengthMin');
+    const noteLengthMaxInput = document.getElementById('noteLengthMax');
+    const densityInput = document.getElementById('density');
+    const tempoInput = document.getElementById('tempo');
     const status = document.getElementById('status');
     const notesDisplay = document.getElementById('notesDisplay');
 
@@ -377,20 +447,50 @@
       );
     });
 
+    noteLengthMinInput.addEventListener('input', (e) => {
+      const minVal = parseFloat(e.target.value);
+      const maxVal = parseFloat(noteLengthMaxInput.value);
+      document.getElementById('noteLengthMinValue').textContent = `${minVal.toFixed(1)}s`;
+      if (minVal < maxVal) {
+        window.harmonicMusic.setNoteLength(minVal, maxVal);
+      }
+    });
+
+    noteLengthMaxInput.addEventListener('input', (e) => {
+      const minVal = parseFloat(noteLengthMinInput.value);
+      const maxVal = parseFloat(e.target.value);
+      document.getElementById('noteLengthMaxValue').textContent = `${maxVal.toFixed(1)}s`;
+      if (minVal < maxVal) {
+        window.harmonicMusic.setNoteLength(minVal, maxVal);
+      }
+    });
+
+    densityInput.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      document.getElementById('densityValue').textContent = `${value} note${value > 1 ? 's' : ''}`;
+      window.harmonicMusic.setDensity(value);
+    });
+
+    tempoInput.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      document.getElementById('tempoValue').textContent = `${value} BPM`;
+      window.harmonicMusic.setTempo(value);
+    });
+
     // Intercept console.log to show in UI
     const originalLog = console.log;
     console.log = function(...args) {
       originalLog.apply(console, args);
       const message = args.join(' ');
-      if (message.includes('✨') || message.includes('🔕') || message.includes('🔊')) {
+      if (message.includes('✨') || message.includes('🔕') || message.includes('🔊') || message.includes('⏱️') || message.includes('📈') || message.includes('🎼')) {
         const item = document.createElement('div');
         item.className = 'note-item';
         item.textContent = message;
         notesDisplay.appendChild(item);
         notesDisplay.scrollTop = notesDisplay.scrollHeight;
         
-        // Keep only last 10 messages
-        while (notesDisplay.children.length > 10) {
+        // Keep only last 8 messages
+        while (notesDisplay.children.length > 8) {
           notesDisplay.removeChild(notesDisplay.firstChild);
         }
       }
